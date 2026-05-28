@@ -11,7 +11,7 @@ A saddle if saddled.
 17 orbs upon breeding.
 Killing a piglet yields no items nor experience.
 
-Pigs roam the Overworld avoiding hazards and harmful falls. A pig flees for a short time when harmed.
+Pigs roam the Overworld avoiding hazards and harmful falls while snorting occasionally. A pig flees for a short time when harmed.
 When a pig or piglet is struck by lightning, it transforms into a zombified piglin or baby zombified piglin, respectively. If the pig was equipped with a saddle, the saddle is lost and the player dismounts. If lightning strikes a pig in Peaceful difficulty, the pig does not transform but takes normal damage from the strike.
 
 It is possible to ride an adult pig by using a saddle on it. When a saddle is used on a pig, the pig might stare at the player for a few seconds. Saddled pigs are controllable with a carrot on a stick. They start slow but accelerate to 5.20 blocks/s. Piglets cannot be saddled nor ridden.

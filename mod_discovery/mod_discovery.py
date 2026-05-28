@@ -15,8 +15,16 @@ def search_fandom_wiki(mod_name):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
     
+    # Retry mechanism for stability
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
+    
+    session = requests.Session()
+    retries = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+    session.mount('https://', HTTPAdapter(max_retries=retries))
+    
     try:
-        resp = requests.get(url, headers=headers, timeout=10)
+        resp = session.get(url, headers=headers, timeout=15)
         if resp.status_code == 200:
             # Look for fandom.com subdomains
             matches = re.findall(r'https?://([a-zA-Z0-9-]+)\.fandom\.com/', resp.text)
@@ -151,3 +159,22 @@ def fetch_full_project_details(slug):
     except:
         pass
     return None
+
+def filter_mods(mods_list):
+    """
+    Filters the list of detected mods.
+    For now, this is a passthrough, but can be expanded to remove libraries/APIs if needed.
+    """
+    # Example logic: Filter out empty names or system files if we had any.
+    # Checks if 'mods_list' is the format from modrinth or local detection.
+    # Assuming it's a list of strings or dicts.
+    if not mods_list:
+        return []
+    return [m for m in mods_list if m]  # Basic filtering
+
+def find_wiki_for_mod(mod_name):
+    """
+    Main entry point for finding a wiki for a mod name.
+    """
+    # Simply alias to the fallback finder which does the heuristics/search
+    return find_wiki_fallback(mod_name)

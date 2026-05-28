@@ -14,9 +14,8 @@ Petrified oak slabs are mostly notable for where their behavior diverges from th
 Unlike other wooden slabs:
 
 Petrified oak slabs make the sounds characteristic of stone.
-They require a pickaxe to mine. If broken without a pickaxe, they drop nothing.
-They cannot be used to craft a barrel, lectern or chiseled bookshelf.
-They cannot be crafted into a composter.
+They require a pickaxe to mine instead of an axe. If broken without a pickaxe, they drop nothing.
+They cannot be used to replace wooden slabs in crafting recipes.
 They are not flammable, nor are they set on fire by nearby lava.
 They cannot be used as fuel in a furnace.
 They have a greater blast resistance.

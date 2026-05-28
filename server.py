@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify, Response  # type: ignore
+from flask import Flask, request, jsonify, Response, stream_with_context  # type: ignore
 from flask_cors import CORS  # type: ignore
 from flask_limiter import Limiter  # type: ignore
 from flask_limiter.util import get_remote_address  # type: ignore
-from config.rag_pipeline import generate_answer, generate_answer_stream, reload_qa_chain
+from config.rag_pipeline import generate_answer, reload_qa_chain
 from config import config
 from config import build_index
 from wiki import wiki_loader
@@ -10,7 +10,6 @@ from wiki import clean_data
 import multiprocessing
 import threading
 import os
-import json
 
 app = Flask(__name__)
 limiter = Limiter(get_remote_address, app=app)
@@ -59,35 +58,33 @@ def ask_question():
 
 @app.route("/ask/stream", methods=["POST"])
 def ask_question_stream():
-    """
-    Streaming endpoint that sends answer chunks as Server-Sent Events (SSE).
-    Each event has a type: 'token' (content chunk), 'done' (completion), or 'error'.
-    """
     data = request.get_json()
     if not data or "question" not in data:
         return jsonify({"error": "Missing 'question' field"}), 400
 
+    q_len = len(data["question"])
+    print(f"📥 Received question of length: {q_len} characters")
+    if q_len > 10000:
+        print(f"⚠️ WARNING: Massive input detected! First 500 chars: {data['question'][:500]}")
+    
+    from config.rag_pipeline import generate_answer_stream
+
     def generate():
         try:
-            for event_type, content in generate_answer_stream(data["question"]):
-                event_data = json.dumps({"type": event_type, "content": content})
-                yield f"data: {event_data}\n\n"
+            for token in generate_answer_stream(data["question"]):
+                # Ensure properly escaped JSON string for the data payload
+                import json
+                payload = json.dumps({"answer": token}) # Client appends this
+                yield f"data: {payload}\n\n"
+            
+            yield "data: [DONE]\n\n"
+            
         except Exception as e:
             import traceback
             traceback.print_exc()
-            error_data = json.dumps({"type": "error", "content": str(e)})
-            yield f"data: {error_data}\n\n"
+            yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
 
-    return Response(
-        generate(),
-        mimetype="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no"
-        }
-    )
-
+    return Response(stream_with_context(generate()), mimetype="text/event-stream")
 
 def background_wiki_processing(api_url, categories, force=False):
     if api_url in in_progress_wikis:
@@ -142,37 +139,11 @@ def add_wiki():
 
 @app.route("/admin/detect-mods", methods=["POST"])
 def detect_mods():
-    data = request.get_json()
-    if not data or "mods" not in data:
-        return jsonify({"error": "Missing 'mods' list"}), 400
-        
-    raw_mods = data["mods"]
-    from mod_discovery import mod_discovery
-    
-    filtered_mods = mod_discovery.filter_mods(raw_mods)
-    found_wikis = []
-    
-    processed = load_processed_wikis()
-    import time
-    
-    for mod in filtered_mods:
-        wiki_url = mod_discovery.find_wiki_for_mod(mod)
-        if wiki_url:
-            # Skip if already in progress or processed recently
-            last_time = processed.get(wiki_url, 0)
-            if wiki_url not in in_progress_wikis and (time.time() - last_time > 86400):
-                found_wikis.append({"mod": mod, "url": wiki_url})
-                # Trigger background processing for each found wiki
-                default_cats = ["Crafting", "Items", "Blocks", "Mobs"]
-                threading.Thread(target=background_wiki_processing, args=(wiki_url, default_cats)).start()
-            else:
-                reason = "in_progress" if wiki_url in in_progress_wikis else "recently_processed"
-                print(f"⏭️ Skipping background processing for {wiki_url} ({reason})")
-            
     return jsonify({
         "status": "success", 
-        "processed_mods": len(found_wikis), 
-        "details": found_wikis
+        "processed_mods": 0, 
+        "details": [],
+        "message": "Mod detection and wiki search is currently disabled."
     })
 
 

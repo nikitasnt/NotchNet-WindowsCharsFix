@@ -27,62 +27,25 @@ python -m pip install -r requirements.txt
 :: 5. Configure Environment
 set FLASK_APP=server.py
 set LOCAL_MODE=true
+set CLOUD_MODE=true
+:: Default model (can be overridden by .env or user input if we wanted)
+if "%LLM_MODEL%"=="" set LLM_MODEL=moonshotai/kimi-k2:free
 
 echo.
 echo ---------------------------------------------------
-echo ☁️  Mode Selection
+echo ✅ Configuration
 echo ---------------------------------------------------
-echo 1) Run Fully Local (Standard)
-echo 2) Run with Cloud Model (Uses light local proxy + cloud inference)
-set /p MODE_OPT="Select option [1]: "
-if "%MODE_OPT%"=="" set MODE_OPT=1
+echo 🤖 LLM Model: %LLM_MODEL% (OpenRouter)
+echo 🧠 Embeddings: Local (HuggingFace)
+echo ---------------------------------------------------
 
-if "%MODE_OPT%"=="2" (
-    set CLOUD_MODE=true
-) else (
-    set CLOUD_MODE=false
-)
-
-:: 6. Check for Ollama (Required for both modes)
-ollama --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ❌ Ollama is not installed. Please install it from https://ollama.com/
-    exit /b 1
-)
-
-:: 7. Prompt for Model
-echo.
-echo 🤖 Which Ollama model would you like to use?
-if "%CLOUD_MODE%"=="true" (
-    echo    Default: gemini-3-flash-preview:cloud (Press Enter to use default)
-    set /p USER_MODEL="   Model Name: "
-    if "!USER_MODEL!"=="" set USER_MODEL=gemini-3-flash-preview:cloud
-) else (
-    echo    Default: llama3:8b (Press Enter to use default)
-    set /p USER_MODEL="   Model Name: "
-    if "!USER_MODEL!"=="" set USER_MODEL=llama3:8b
-)
-set LLM_MODEL=!USER_MODEL!
-
-:: 8. Check if Models are pulled
-echo 🔍 Checking for required models in Ollama...
-for %%M in ("%LLM_MODEL%" "nomic-embed-text") do (
-    ollama list | findstr /R /C:"%%~M " >nul
-    if %errorlevel% neq 0 (
-        echo ⬇️ Model '%%~M' not found. Pulling it now... (This might take a while)
-        ollama pull "%%~M"
-    else (
-        echo ✅ Model '%%~M' is ready.
-    )
-)
-
-:: 9. Check for Index
+:: 6. Check for Index
 if not exist faiss_index (
     echo 🧠 No knowledge base found. Building initial index...
     python config/build_index.py
 )
 
-:: 10. Start Server
+:: 7. Start Server
 echo ✅ Setup complete. Starting Server...
 echo ---------------------------------------------------
 echo 🌐 Server running at http://localhost:8000

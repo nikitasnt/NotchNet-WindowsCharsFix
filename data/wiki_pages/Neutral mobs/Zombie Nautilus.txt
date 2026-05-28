@@ -1,4 +1,4 @@
-A zombie nautilus is an undead neutral mob that will be added in Mounts of Mayhem. It is an undead variant of the nautilus and is always ridden by drowned, forming a zombie nautilus jockey. It was revealed in Minecraft Live - September 2025.
+A zombie nautilus is an undead neutral mob that was added in Mounts of Mayhem. It is an undead variant of the nautilus and is always ridden by drowned, forming a zombie nautilus jockey. It was revealed in Minecraft Live - September 2025.
 
 
 == Spawning ==
@@ -13,9 +13,20 @@ Zombie nautiluses drop 1 to 3 experience orbs and rotten flesh upon death by a p
 
 
 == Behavior ==
-Like nautiluses, zombie nautiluses use their mouths to propel forward. When they are harmed by a player, they use their dash attack to propel forward and inflict damage on the player.
-Unlike nautiluses, zombie nautiluses can survive on land instead of suffocating.
-Unlike nautiluses, zombie nautiluses cannot be bred, as they do not have their baby variants. However, they can be tamed and saddled.
+Like nautiluses, zombie nautiluses use their mouths to propel forward. When a player attacks an untamed nautilus, it uses its dash attack to propel forward and inflict damage on the player.
+Unlike nautiluses, zombie nautiluses can survive on land instead of suffocating out of water.
+
+
+=== Taming ===
+Zombie Nautili can be tamed by feeding them pufferfish or with Buckets with Pufferfish.
+
+
+=== Riding ===
+Tamed zombie nautili can be equipped with a Nautilus Armor and can be ridden on by using a saddle. When ridden, it gives a "Breath of the Nautilus" effect, which pauses the player's oxygen bar and prevents the player from drowning.
+
+
+=== Breeding ===
+Unlike nautiluses, zombie nautiluses cannot be bred, as they do not have their baby variants.
 
 
 === Zombie Nautilus Jockey ===

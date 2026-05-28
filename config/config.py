@@ -25,9 +25,13 @@ if CLOUD_MODE:
     
 CLOUD_API_KEY = os.environ.get("CLOUD_API_KEY", "")
 
+# OpenRouter / OpenAI Compatible Config
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
 # Default to a smaller model for local users if not specified, 
 # but if cloud mode is true, we might want a bigger default or user specified.
-LLM_MODEL = os.environ.get("LLM_MODEL", "llama3:8b") 
+LLM_MODEL = os.environ.get("LLM_MODEL", "openai/gpt-oss-120b:free") 
 
 # Paths
 DATA_DIR_RAW = "data/wiki_pages"

@@ -10,7 +10,7 @@ In Bedrock Edition, when using spawn eggs or the /summon command to spawn a wand
 A wandering trader despawns after being loaded for 48000 ticks (40 minutes, or 2 full Minecraft days), although ticks spent with the trading UI open are not counted. Naming the wandering trader with a name tag or placing the wandering trader in a boat/minecart does not prevent it from despawning. This also includes wandering traders as passengers of other mobs in Java Edition, where the wandering trader still despawns if summoned on top of another mob.
 When a wandering trader is unloaded, either by moving into unloaded chunks or entering another dimension, its despawn timer freezes.
 
-The wandering trader has 6 random trades. New trades are not unlocked after trading with it.
+The wandering trader has 6 random trades and 2 random items that you can sell to the wandering trader. New trades are not unlocked after trading with it.
 After spawning, the wandering trader prefers to wander within 16 blocks of the initial spawning target location, even if that player leaves or the bell is removed, if not otherwise reacting to nearby players or mobs.
 The wandering trader can sometimes form a caravan, due to wild llamas that follow the leashed trader llama(s).
 Wandering traders drink a potion of invisibility during dusk and as needed to renew the effect during the night. They also drink milk if invisible during the day to remove the invisibility effect.
@@ -20,11 +20,10 @@ When attacked by a player, a wandering trader flees from the player as a village
 Despite their similarities to villagers, attacking or killing wandering traders does not anger iron golems.
 Unlike most other villager-like mobs, wandering traders do not visually sit down when riding objects such as boats and minecarts.
 
-The trading system is a gameplay mechanic that allows players to buy items with emeralds, but from a wandering trader this time.
-A player can click on the wandering trader to view the items offered for sale, similar to a villager. Different offers are visible in a list, and clicking on one of the offers moves the corresponding items to the slots above the player's inventory. All offers involve emeralds as a currency.
+The trading system is a gameplay mechanic that allows players to buy items with emeralds, but from a wandering trader this time. And since snapshot 23W31A wandering traders have also offered the option to buy items from the player as well.
+A player can click on the wandering trader to view the items offered to buy or sell, similar to a villager. Different offers are visible in a list, and clicking on one of the offers moves the corresponding items to the slots above the player's inventory. All offers involve emeralds as a currency.
 Wandering traders typically sell items generated in the world or otherwise related to nature, such as plants, dyes, and buckets of fish. They can also trade less common items, such as coral blocks, blue ice, or nautilus shells. Overall, trades offered by wandering traders offer a way to obtain biome-specific materials, without having to travel to the specific biomes.
-
-In new Versions of Minecraft it is also possible to trade items against Emerald, such as fermented spider eye or a water bucket.
+In new Versions of Minecraft, you can trade items to Wandering Traders including Hay Bales, Water Bottles, Baked Potatoes (x4), Milk Buckets, Water Buckets, and Fermented Spider Eyes.
 After the player purchases the same item several times, the wandering trader locks the trade, but unlike villagers, never unlocks the trade. The wandering trader can appear again around the player with new trades after a while.
 Wandering traders do not have the novice-master trading system like villagers. Instead, the player can buy anything from the wandering trader without the need of unlocking the previous trades.
 Wandering traders do not increase or decrease the prices of its items being sold if attacked by the player, or if the player has the Hero of the Village effect.

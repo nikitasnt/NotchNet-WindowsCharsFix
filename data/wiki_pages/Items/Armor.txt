@@ -671,6 +671,11 @@ Damage caused by any other source does not cause the mob's armor durability to d
 			
 		
 
+		
+			
+			
+		
+
 
 === Horse armor ===
 

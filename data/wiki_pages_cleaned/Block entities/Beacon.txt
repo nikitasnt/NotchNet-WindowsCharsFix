@@ -21,7 +21,7 @@ A vertical beam appears from a beacon if the beacon is activated, extending from
 In Java Edition, the beam is visible up to 256 blocks away.
 In Bedrock Edition, the beam is visible up to 64 blocks away, regardless of how high the render distance is set.
 
-The color of the beam may be changed by placing blocks of stained glass (or stained glass panes) anywhere above the beacon block. The beam changes colors according to the colors of glass placed above it: the first block sets the beam color, while each additional block sets the color by averaging the red, green, and blue components of the current beam color and the block's color. The color values are the same as those for the corresponding dye. This also works using hardened stained glass and hardened stained glass panes. Stained glass panes have the same effect on the beam as stained glass blocks.
+The color of the beam may be changed by placing blocks of stained glass (or stained glass panes) anywhere above the beacon block. The beam changes colors according to the colors of glass placed above it: the first block sets the beam color, while each additional block sets the color by averaging the red, green, and blue components of the current beam color and the block's color. The color values are the same as those for the corresponding dye. This also works using hardened stained glass and hardened stained glass panes. Stained glass panes have the same effect on the beam as stained glass blocks. It is also important to note that adding normal glass in between the stained glass blocks doesn't change the position that the stained glass block is in. I.e. If I place glass + green glass + red glass+ glass + glass + purple glass <=>  green glass + red glass + purple glass.
 The resulting beam color can be found as 
   
     
@@ -120,10 +120,48 @@ where
     {\displaystyle C_n}
   
  to the highest one). 
-n : the number of glass blocks in the sequence - 1.
+n : (the number of glass blocks in the sequence) - 1. I.e if there are 10 stained glass blocks n=9.
 C is the new color that is produced .
+The beam can also be described by the simple recurrence relation:
+  
+    
+      
+        
+          C
+          
+            n
+            +
+            1
+          
+        
+        =
+        
+          
+          
+            
+              
+                
+                  C
+                  
+                    n
+                  
+                
+                +
+                
+                  new glass stained block
+                
+              
+              2
+            
+          
+          
+        
+      
+    
+    {\displaystyle C_{n+1}=\left\lfloor {\frac {C_{n}+{\text{new glass stained block}}}{2}}\right\rfloor }
+  
 
-As the blending algorithm is considerably simpler than that of leather-dyeing, a much larger part of the RGB space is available. Since the colours are added in such a way that their weighted sum is equal to 1 only colours within the convex hull formed by the available glass blocks colours are achievable. Precisely 5 043 528 colours can be made ~30% of the RGB spectrum. A player may experiment with stacking glass, although programs that calculate permutations are also available.
+As the blending algorithm is considerably simpler than that of leather-dyeing, a much larger part of the RGB space is available. Since the colors are added in such a way that their weighted sum is equal to 1 only colours within the convex hull formed by the available glass blocks colors are achievable. Precisely 5 043 528 colors can be made ~30% of the RGB spectrum. A player may experiment with stacking glass, although programs that calculate permutations are also available.
 Beacon beams cannot go through most blocks, but can go through bedrock (to allow beacons to be used in the Nether) and end portal frames.
 
 Once the beacon is emitting a beam, it can then be fed one iron ingot, gold ingot, emerald, diamond, or netherite ingot to select the status effects given to players within range of the beacon. This is done through the beacon's GUI, displayed by pressing use while looking at the beacon block. It doesn't matter which of the items is fed into the beacon.

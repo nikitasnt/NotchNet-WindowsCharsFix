@@ -1,4 +1,4 @@
-Generic villagers were passive mobs that inhabit villages, with different professions, breed, and interact. Their clothing varied according to their occupation. A player could trade with villagers, using emeralds as currency. They were replaced with a revamped version of themselves in the Village & Pillage update.
+Generic villagers, formerly called "Testificates", were passive mobs that inhabit villages, with different professions, breed, and interact. Their clothing varied according to their occupation. A player could trade with villagers, using emeralds as currency. They were replaced with a revamped version of themselves in the Village & Pillage update.
 
 In Java Edition, old villagers can only spawn in versions of Minecraft prior to 1.14. In Bedrock Edition, old villagers can only spawn if they existed from a template world prior to 1.11.0, and any old villager spawned after 1.11.0 outside a template world will be converted into villager_v2.
 

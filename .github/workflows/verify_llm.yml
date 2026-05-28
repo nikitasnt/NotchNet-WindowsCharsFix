@@ -1,0 +1,40 @@
+name: Verify LLM Configuration
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        
+    - name: Verify Config Loading
+      env:
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        LLM_MODEL: "moonshotai/kimi-k2:free"
+      run: |
+        # Create a temporary verification script
+        echo "import os" > verify_secret.py
+        echo "key = os.environ.get('OPENROUTER_API_KEY')" >> verify_secret.py
+        echo "if key and len(key) > 10:" >> verify_secret.py
+        echo "  print('✅ OPENROUTER_API_KEY is present and looks valid.')" >> verify_secret.py
+        echo "else:" >> verify_secret.py
+        echo "  print('❌ OPENROUTER_API_KEY is missing or too short.')" >> verify_secret.py
+        echo "  exit(1)" >> verify_secret.py
+        
+        python verify_secret.py

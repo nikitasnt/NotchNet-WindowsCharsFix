@@ -17,8 +17,6 @@ Neutral mobs are sometimes passive and sometimes hostile toward the player. All 
 
 Hostile mobs are dangerous, aggressive mobs that always attack the player within their respective detection ranges.
 
-Boss mobs are hostile mobs with healthbars.
-
 Compound mobs, also called jockeys, are a special condition in which a mob spawns riding another mob. All jockeys are hostile except for the strider jockey, which is neutral.
 
 Only contains a few mobs that never spawn naturally in-game as they can only be summoned with the /summon command though the zombie horse, Agent and NPC can be spawned in with a spawn egg.

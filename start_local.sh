@@ -31,62 +31,31 @@ $PYTHON_CMD -m pip install -r requirements.txt
 # 5. Configure Environment
 export FLASK_APP=server.py
 export LOCAL_MODE=true
+export CLOUD_MODE=true
+# Default model (can be overridden by .env or user input if we wanted)
+# But user requested OpenRouter only.
+# Load .env if it exists to respect user config
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
+export LLM_MODEL=${LLM_MODEL:-"xiaomi/mimo-v2-flash:free"}
 
 echo ""
 echo "---------------------------------------------------"
-echo "☁️  Mode Selection"
+echo "✅ Configuration"
 echo "---------------------------------------------------"
-echo "1) Run Fully Local (Standard)"
-echo "2) Run with Cloud Model (Uses light local proxy + cloud inference)"
-read -p "Select option [1]: " MODE_OPT
-MODE_OPT=${MODE_OPT:-1}
+echo "🤖 LLM Model: $LLM_MODEL (OpenRouter)"
+echo "🧠 Embeddings: Local (HuggingFace)"
+echo "---------------------------------------------------"
 
-if [ "$MODE_OPT" = "2" ]; then
-    export CLOUD_MODE=true
-    # For "Ollama Cloud", we presumably still talk to localhost, 
-    # but the model name directs it to the cloud.
-else
-    export CLOUD_MODE=false
-fi
-
-# 6. Check for Ollama (Required for both modes now)
-if ! command -v ollama &> /dev/null; then
-    echo "❌ Ollama is not installed. Please install it from https://ollama.com/"
-    exit 1
-fi
-
-# 7. Prompt for Model
-echo ""
-echo "🤖 Which Ollama model would you like to use?"
-if [ "$CLOUD_MODE" = "true" ]; then
-    echo "   Default: gemini-3-flash-preview:cloud (Press Enter to use default)"
-    read -p "   Model Name: " USER_MODEL
-    USER_MODEL=${USER_MODEL:-gemini-3-flash-preview:cloud}
-else
-    echo "   Default: llama3:8b (Press Enter to use default)"
-    read -p "   Model Name: " USER_MODEL
-    USER_MODEL=${USER_MODEL:-llama3:8b}
-fi
-export LLM_MODEL=$USER_MODEL
-
-# 8. Check if Models are pulled
-echo "🔍 Checking for required models in Ollama..."
-for MODEL in "$LLM_MODEL" "nomic-embed-text"; do
-    if ! ollama list | grep -q "$MODEL"; then
-        echo "⬇️ Model '$MODEL' not found. Pulling it now... (This might take a while)"
-        ollama pull "$MODEL"
-    else
-        echo "✅ Model '$MODEL' is ready."
-    fi
-done
-
-# 9. Check for Index
+# 6. Check for Index (and Sentence Transformers)
 if [ ! -d "faiss_index" ]; then
     echo "🧠 No knowledge base found. Building initial index..."
     $PYTHON_CMD config/build_index.py
 fi
 
-# 10. Start Server
+# 7. Start Server
 echo "✅ Setup complete. Starting Server..."
 echo "---------------------------------------------------"
 echo "🌐 Server running at http://localhost:8000"

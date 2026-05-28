@@ -3,8 +3,9 @@ import shutil
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from tqdm import tqdm
+# from config import config  # <-- This was causing the error
 from config import config
 
 def build_index():
@@ -52,11 +53,8 @@ def build_index():
     print(f"✅ Created {len(chunks)} chunks.")
 
     # 4. Initialize embeddings
-    print(f"🧠 Initializing embeddings (Ollama: nomic-embed-text)...")
-    embeddings = OllamaEmbeddings(
-        model="nomic-embed-text",
-        base_url=config.OLLAMA_HOST
-    )
+    print(f"🧠 Initializing embeddings (HuggingFace: all-MiniLM-L6-v2)...")
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
     # 5. Build and save FAISS index
     print("🏗️ Building FAISS index (this may take a while)...")

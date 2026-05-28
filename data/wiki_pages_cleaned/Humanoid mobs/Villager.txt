@@ -65,7 +65,7 @@ Farmer villagers only start farming if a crop is planted on farmland previously.
 Farmer villagers continue to plant on the farmland even if all crops are destroyed.
 For both editions,
 
-Farmer villagers cannot turn dirt, grass blocks, or dirt paths into farmland. Nor they pick up any hoes to till the blocks.
+Farmer villagers can neither turn dirt, grass blocks, or dirt paths into farmland nor pick up any hoes to till the blocks.
 If a hoe is placed into a farmer villager's mainhand or offhand via commands, they still cannot till any blocks.
 Farmer villagers often share their crops and food with other villagers if they have any extras.
 
@@ -270,7 +270,7 @@ Ancient villagers have been shown in Minecraft Legends, although they were hinte
 In Java Edition, the death messages of villagers are recorded in the game's logs.
 Cleric villagers have a pattern on the back of their coat reminiscent of a Creeper's face.
 In Bedrock Edition, when a villager offers a piece of armor as a trade, it makes said armor piece's tier's corresponding equipment sound.
-In the new Lava Chicken disc, a villager is heard singing in most of the segments.
+In the new Lava Chicken music disc, a villager is heard singing in most of the segments.
 
                                                                            
 On April 1, 2014, Mojang announced that villagers have taken over the skin servers and content delivery networks (CDN) as an April Fools joke. This caused the player's current skin to turn into villager skins, and caused users to be unable to change their skins unless modifying the launcher.json file. Different career villager skins were used, including the then-unused nitwit villager (green robe).

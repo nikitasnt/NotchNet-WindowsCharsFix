@@ -4,7 +4,7 @@ Wooden buttons remain pressed for longer, and can also be pressed by arrows, tri
 
 A wooden button is easily broken with an axe, but drops itself as an item if broken using any tool. A stone button must be mined with a pickaxe to drop as an item.
 
-in Java Edition, a pickaxeis not required to mine a stone/polished blackstone button. However in Bedrock Edition, a pickaxe is required to mine a stone/polished blackstone button
+in Java Edition, a pickaxe is not required to mine a stone/polished blackstone button. However in Bedrock Edition, a pickaxe is required to mine a stone/polished blackstone button
 A button is removed and drops as an item if:
 
 its attachment block is moved, removed, or destroyed.

@@ -1,4 +1,4 @@
-Boots are a type of armor that covers the feet of the player. There are seven types of boots: leather boots, chainmail boots, copper boots‌, iron boots, diamond boots, gold boots, and netherite boots.
+Boots are a type of armor that covers the feet of the player. There are seven types of boots: leather boots, chainmail boots, copper boots, iron boots, diamond boots, gold boots, and netherite boots.
 
 
 == Obtaining ==
@@ -32,7 +32,7 @@ In Bedrock Edition, vindicators and pillagers that spawn in raids have a chance 
 
 
 === Chest loot ===
-In Bedrock Edition, a sealed room in woodland mansions can appear that has a chest sometimes containing an Efficiency I leather boots.
+In Bedrock Edition, a sealed room in woodland mansions can appear that has a chest sometimes containing a pair of Efficiency I leather boots.
 
 
 === Trading ===

@@ -1,0 +1,4 @@
+La Table d'Enchantement Auto est un bloc ajouté par OpenBlocks. Ce bloc enchante automatiquement les outils en utilisant d'expérience liquide. Le niveau d'enchantement peut être déterminer en glissant la bar dans le GUI à gauche/droite. L'expérience liquide peut être pompée dans l'Enchanteur Auto par choisir l'option "Boire Auto" dans le GUI, ensuite sélecter la face dans laquelle va boire la table. Les outils et matériels peuvent être extraits d'une inventaire adjacente en appuyant sur le bouton "Extrait Auto" dans le GUI, ensuite sélecter la face dans laquelle va extraire la table. Cela doit être fait une fois pour les outils et une autre fois pour les matériels/livres séparément; elle peut avoir la même face pour extraire. La même fonctionnalité est valable pour rejeter automatiquement les objets enchantés/réparés. La Table d'Enchantement Auto peut être pivoter dans le GUI en restant sur le clic-droit et faire tourner l'enclume.
+
+
+== Recette ==

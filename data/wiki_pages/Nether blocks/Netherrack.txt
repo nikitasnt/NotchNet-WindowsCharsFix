@@ -1,4 +1,4 @@
-Netherrack is a frail stone block found abundantly in the Nether and in blobs below ruined portals. Netherrack itself is not flammable, but fire lit on top of netherrack burns indefinitely.
+Netherrack is a frail stone block found abundantly in the Nether and in blobs below ruined portals. Although it itself is not flammable, fire lit on top of it burns indefinitely.
 
 
 == Obtaining ==
@@ -12,7 +12,7 @@ Netherrack can also be obtained by mining nylium with a pickaxe not enchanted wi
 
 === Natural generation ===
 Netherrack makes up most of the Nether's terrain, and also generates as part of ruined portals in the Overworld.
-Netherrack generates as part of bridge and treasure room bastion remnants.
+Netherrack generates as part of the bridge and treasure room bastion remnants.
 
 
 === Post-generation ===
@@ -21,10 +21,10 @@ Crimson or warped nylium transforms into netherrack if a solid, opaque block is 
 
 
 == Usage ==
-Netherrack is mostly used as a cheap building block. Because of its abundance and softness, it is often used to construct temporary structures that can be used for scaffolding, blockage, or other purposes.
+Netherrack is primarily used as a cost-effective building material. Due to its abundance and softness, it is often used to construct temporary structures that serve as scaffolding, blocking, or for other purposes.
 When netherrack's top is lit on fire, the fire burns indefinitely. Unlike soul fire, this fire can spread.
 Using bone meal on netherrack placed next to warped nylium or crimson nylium transforms the netherrack into more nylium.
-Analyzing the netherrack in a material reducer, it turns out to be a volcanic silicate rock rich in mercury.‌
+Analysing the netherrack in a material reducer, it turns out to be a volcanic silicate rock rich in mercury.‌
 
 
 === Crafting ingredient ===

@@ -384,7 +384,7 @@ Issues relating to "Redstone", "Redstone dust", or "Redstone wire" are maintaine
 == Trivia ==
 Five updates for Windows 10 released from 2016 to 2018 were codenamed "Redstone", referencing Minecraft.
 The block has 1,296 possible block state combinations, the highest of all blocks as of 1.15.2, beating fire's 512 and note block's 800.
-According to Minecraft Education, redstone dust contains radioactive elements.
+According to Minecraft Education, redstone dust contains radioactive elements, specifically uranium.
 
 
 == References ==

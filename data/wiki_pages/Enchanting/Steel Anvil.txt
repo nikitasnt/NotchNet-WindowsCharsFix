@@ -1,0 +1,4 @@
+The Steel Anvil is a block from the Railcraft mod. This block is functionally identical to the Vanilla Anvil, only it has twice the durability, and can enchant items up to experience level 50.
+
+
+== Recipe ==

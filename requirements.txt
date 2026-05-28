@@ -72,4 +72,7 @@ xxhash==3.6.0
 yarl==1.22.0
 zstandard==0.25.0
 gunicorn 
-flask-limiter 
+flask-limiter
+sentence-transformers
+langchain-huggingface
+tf-keras 

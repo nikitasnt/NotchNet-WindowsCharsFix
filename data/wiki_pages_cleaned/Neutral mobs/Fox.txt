@@ -51,7 +51,7 @@ A fox that trusts the player flees from wolves and polar bears unless the wolf o
 When attacking phantoms, foxes do not jump to attack.
 A trusting fox does not attack a tamed wolf unless the fox doesn't trust the player who tamed the wolf.
 Foxes that trust the player attack zombies, drowned, husks, zombified piglins, skeletons, wither skeletons, strays, phantoms, silverfish, endermites, spiders, cave spiders, vexes, vindicators, evokers, pillagers, ravagers, blazes, endermen, goats and pandas, when those mobs attack the player. They do not attack any mob the player attacks, unlike tamed wolves. They also do not attack zombie villagers despite the fact that they are a zombie variant. 
-Tamed foxes retreat from polar bears and wolves but not tamed wolves. A tamed wolf whose owner attacks a tamed fox also attacks the fox.
+Trusting foxes retreat from polar bears and wolves but not tamed wolves. A tamed wolf whose owner attacks a tamed fox also attacks the fox.
 
 Java Edition:
 Foxes use the Friendly Creatures sound category for entity-dependent sound events.

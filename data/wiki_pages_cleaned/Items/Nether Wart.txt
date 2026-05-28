@@ -34,4 +34,4 @@ Issues relating to "Nether Wart" are maintained on the bug tracker. Report issue
 
 Nether wart's stage changes cannot be detected by a block update detector, but can by an observer block.
 Unlike other crimson "plants", nether wart doesn't have a warped equivalent. This is also the case with nether sprouts, which lack a crimson equivalent.
-InA Minecraft Movie, Piglins rely on Nether Wart, which allows them to not zombify in the Overworld.
+In A Minecraft Movie, Piglins rely on nether wart, which allows them to not zombify in the Overworld.

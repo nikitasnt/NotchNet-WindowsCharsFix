@@ -1,0 +1,4 @@
+L'Enclume Auto est un bloc ajouté par OpenBlocks. Ce bloc répare et enchante automatiquement les outils en utilisant d'expérience liquide. Enchanter les outils va nécessiter des livres enchantés qui doivent être mis dans l'Enclume Auto comme une Enclume normale. L'expérience liquide peut être pompée dans l'Enclume Auto par choisir l'option "Boire Auto" dans le GUI, ensuite sélecter la face dans laquelle va boire l'enclume. Les outils et matériels peuvent être extraits d'une inventaire adjacente en appuyant sur le bouton "Extrait Auto" dans le GUI, ensuite sélecter la face dans laquelle va extraire l'enclume. Cela doit être fait une fois pour les outils et une autre fois pour les matériels/livres; elle peut avoir la même face pour extraire. La même fonctionnalité est valable pour rejeter automatiquement les objets enchantés/réparés. L'Enclume Auto peut être pivoter dans le GUI en restant sur le clic-droit et faire tourner l'enclume.
+
+
+== Recette ==

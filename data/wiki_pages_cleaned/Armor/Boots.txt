@@ -9,7 +9,7 @@ If a zombie, husk, stray, piglin, or skeleton is wearing armor, there is a 8.5% 
 
 In Bedrock Edition, vindicators and pillagers that spawn in raids have a chance to drop iron boots, which are usually badly damaged and have a 50% chance to be enchanted.
 
-In Bedrock Edition, a sealed room in woodland mansions can appear that has a chest sometimes containing an Efficiency I leather boots.
+In Bedrock Edition, a sealed room in woodland mansions can appear that has a chest sometimes containing a pair of Efficiency I leather boots.
 
 In Java Edition, novice-level armorer villagers have 40% chance to sell iron boots for 4 emeralds. Apprentice-level armorers have a 50% chance to sell chainmail boots for an emerald. Expert-level armorers always sell enchanted diamond boots for 1127 emeralds. Apprentice-level leatherworker villagers have 23 chance to sell leather boots for 4 emeralds.
 Armorer villagers may give the players with the Hero of the Village effect chainmail boots.
