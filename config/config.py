@@ -1,8 +1,11 @@
+import logging
 import os
 from dotenv import load_dotenv
 
 # Load .env file
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 # ===========================
 # Configuration
@@ -32,6 +35,13 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 # Default to a smaller model for local users if not specified, 
 # but if cloud mode is true, we might want a bigger default or user specified.
 LLM_MODEL = os.environ.get("LLM_MODEL", "openai/gpt-oss-120b:free") 
+
+if ":free" in LLM_MODEL:
+    logger.warning(
+        "Using free-tier model '%s'. Free-tier models may have rate limits or availability changes. "
+        "Consider setting LLM_MODEL to a stable paid model via environment variable.",
+        LLM_MODEL,
+    )
 
 # Paths
 DATA_DIR_RAW = "data/wiki_pages"

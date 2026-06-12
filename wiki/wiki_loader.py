@@ -1,10 +1,14 @@
+import logging
 import os
 import re
 import requests
 from time import sleep
 import concurrent.futures
+from functools import partial
 from tqdm import tqdm  # type: ignore
 from config import config
+
+logger = logging.getLogger(__name__)
 
 API_URL = config.WIKI_API_URL_DEFAULT
 DATA_DIR = config.DATA_DIR_RAW
@@ -27,14 +31,15 @@ def fetch_category_members(api_url, category, cmcontinue=None):
     if cmcontinue:
         params["cmcontinue"] = cmcontinue
 
-    for _ in range(3):
+    for attempt in range(3):
         try:
-            resp = requests.get(api_url, params=params)
+            resp = requests.get(api_url, params=params, timeout=30)
             resp.raise_for_status()
             return resp.json()
         except requests.exceptions.RequestException as e:
-            print(f"⚠️ Network error: {e}. Retrying in 3s...")
+            logger.warning("Network error fetching category members: %s. Retrying in 3s... (attempt %d/3)", e, attempt + 1)
             sleep(3)
+    logger.error("Failed to fetch category members for %s after 3 attempts.", category)
     return {}
 
 
@@ -52,7 +57,7 @@ def fetch_page_content(api_url, title):
     }
 
     try:
-        resp = requests.get(api_url, params=params)
+        resp = requests.get(api_url, params=params, timeout=30)
         resp.raise_for_status()
         data = resp.json()
         pages = data.get("query", {}).get("pages", {})
@@ -62,7 +67,7 @@ def fetch_page_content(api_url, title):
             images = page.get("images", [])
             return text, images
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to fetch {title}: {e}")
+        logger.error("Failed to fetch %s: %s", title, e)
 
     return "", []
 
@@ -82,8 +87,8 @@ def save_page_data(category, title, text, image_path):
             if image_path:
                 f.write(f"ImagePath: {image_path}\n\n")
             f.write(text)
-    except Exception as e:
-        print(f"❌ Failed to save {title}: {e}")
+    except OSError as e:
+        logger.error("Failed to save %s: %s", title, e)
 
 
 def download_image(url, folder, filename):
@@ -96,13 +101,13 @@ def download_image(url, folder, filename):
         return path
 
     try:
-        resp = requests.get(url)
+        resp = requests.get(url, timeout=30)
         resp.raise_for_status()
         with open(path, "wb") as f:
             f.write(resp.content)
         return path
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to download image {url}: {e}")
+        logger.error("Failed to download image %s: %s", url, e)
     return None
 
 
@@ -114,7 +119,7 @@ def discover_pages_to_fetch(api_url, category, recipe_categories, visited, work_
     if category in visited:
         return
     visited.add(category)
-    print(f"🔍 Discovering pages in: {category}")
+    logger.info("Discovering pages in: %s", category)
 
     cmcontinue = None
     is_recipe_category = category in recipe_categories
@@ -162,7 +167,7 @@ def process_page_work_item(api_url, work_item):
                     "iiprop": "url"
                 }
                 try:
-                    info_resp = requests.get(api_url, params=image_info_params)
+                    info_resp = requests.get(api_url, params=image_info_params, timeout=30)
                     info_resp.raise_for_status()
                     info_data = info_resp.json()
                     info_pages = info_data.get("query", {}).get("pages", {})
@@ -172,9 +177,9 @@ def process_page_work_item(api_url, work_item):
                             image_filename = image_title.replace("File:", "")
                             image_folder = "static/images/recipes"
                             image_path_to_save = download_image(image_url, image_folder, image_filename)
-                            break # Stop after finding the first recipe image
+                            break  # Stop after finding the first recipe image
                 except requests.exceptions.RequestException as e:
-                    print(f"❌ Failed to fetch image info for {image_title}: {e}")
+                    logger.error("Failed to fetch image info for %s: %s", image_title, e)
             if image_path_to_save:
                 break
 
@@ -186,19 +191,17 @@ def fetch_wiki(api_url, categories, recipe_categories=None):
     if recipe_categories is None:
         recipe_categories = set()
 
-    print(f"--- Phase 1: Discovering all pages to fetch from {api_url} ---")
+    logger.info("--- Phase 1: Discovering all pages to fetch from %s ---", api_url)
     visited = set()
     work_items = []
 
     for cat in categories:
         discover_pages_to_fetch(api_url, cat, recipe_categories, visited, work_items)
 
-    print(f"\n✅ Discovered {len(work_items)} total pages.")
+    logger.info("Discovered %d total pages.", len(work_items))
 
-    print(f"\n--- Phase 2: Downloading pages with {MAX_WORKERS} workers ---")
+    logger.info("--- Phase 2: Downloading pages with %d workers ---", MAX_WORKERS)
 
-    # Partial application to pass api_url to the worker function
-    from functools import partial
     worker_func = partial(process_page_work_item, api_url)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
@@ -210,9 +213,9 @@ def fetch_wiki(api_url, categories, recipe_categories=None):
             try:
                 future.result()
             except Exception as e:
-                tqdm.write(f"❌ A task failed: {e}")
+                logger.error("A task failed: %s", e)
 
-    print("\n🎉 All pages downloaded successfully!")
+    logger.info("All pages downloaded successfully!")
 
 
 if __name__ == "__main__":

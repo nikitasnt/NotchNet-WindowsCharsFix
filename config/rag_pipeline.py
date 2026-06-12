@@ -1,4 +1,7 @@
+import json
+import logging
 import os
+
 import faiss  # type: ignore
 import requests  # type: ignore
 
@@ -12,6 +15,12 @@ from langchain_community.chat_models import ChatOpenAI  # type: ignore
 from config import config
 
 # ===========================
+# Logging
+# ===========================
+
+logger = logging.getLogger(__name__)
+
+# ===========================
 # Configuration
 # ===========================
 
@@ -20,6 +29,11 @@ qa_chain = None
 
 NUM_CORES = os.cpu_count()
 faiss.omp_set_num_threads(NUM_CORES)
+
+MAX_QUESTION_LENGTH = 2000
+MAX_CONTEXT_CHARS = 12000
+MAX_PROMPT_LENGTH = 20000
+RETRIEVER_K = 5
 
 
 QA_PROMPT = PromptTemplate(
@@ -46,46 +60,32 @@ Answer:""",
 )
 
 
-
-
-
-
-
-
-
 # ===========================
 # Helper Functions
 # ===========================
-
-
-
 
 
 def build_retriever():
     """
     Builds a retriever by loading the pre-built FAISS index from disk.
     """
-    # check_ollama() # No longer using Ollama
-
     embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
     if not os.path.exists(INDEX_PATH):
-        print(f"❌ FATAL: FAISS index not found at {INDEX_PATH}")
-        print("Please run the `build_index.py` script first to create the index.")
+        logger.error("FATAL: FAISS index not found at %s", INDEX_PATH)
+        logger.info("Please run the `build_index.py` script first to create the index.")
         raise FileNotFoundError(f"FAISS index not found. Run `build_index.py` first.")
 
     try:
         db = FAISS.load_local(
             INDEX_PATH, embedding_model, allow_dangerous_deserialization=True
         )
-        print(f"🔁 Loaded cached FAISS index from {INDEX_PATH}.")
-        return db.as_retriever(search_kwargs={"k": 5})
+        logger.info("Loaded cached FAISS index from %s.", INDEX_PATH)
+        return db.as_retriever(search_kwargs={"k": RETRIEVER_K})
     except Exception as e:
-        print(f"❌ Error loading FAISS index: {e}")
-        print(
-            "The index might be corrupted. Try deleting the 'faiss_index' directory and re-running `build_index.py`."
-        )
-        raise e
+        logger.error("Error loading FAISS index: %s", e)
+        logger.info("The index might be corrupted. Try deleting the 'faiss_index' directory and re-running `build_index.py`.")
+        raise
 
 
 def build_qa_chain():
@@ -95,151 +95,146 @@ def build_qa_chain():
 
     retriever = build_retriever()
 
-    print(f"🔧 Loading LLM ({config.LLM_MODEL})...")
+    logger.info("Loading LLM (%s)...", config.LLM_MODEL)
     llm_model = ChatOpenAI(
         model=config.LLM_MODEL,
         openai_api_key=config.OPENROUTER_API_KEY,
         openai_api_base=config.OPENROUTER_BASE_URL,
     )
-    print("✅ LLM loaded.")
+    logger.info("LLM loaded.")
 
-    print("🔧 Building new LCEL retrieval chain...")
+    logger.info("Building new LCEL retrieval chain...")
     document_chain = create_stuff_documents_chain(llm_model, QA_PROMPT)
     qa_chain = create_retrieval_chain(retriever, document_chain)
 
-    print("✅ QA chain built successfully.")
+    logger.info("QA chain built successfully.")
     return qa_chain
 
 
 def reload_qa_chain():
     """Forces a reload of the QA chain, useful after index updates."""
     global qa_chain
-    print("🔄 Reloading QA chain...")
+    logger.info("Reloading QA chain...")
     qa_chain = None
     build_qa_chain()
-    print("✅ QA chain reloaded.")
+    logger.info("QA chain reloaded.")
+
+
+def _truncate_question(question: str) -> str:
+    if len(question) > MAX_QUESTION_LENGTH:
+        logger.warning("Truncating massive input (%d chars) to %d chars.", len(question), MAX_QUESTION_LENGTH)
+        return question[:MAX_QUESTION_LENGTH]
+    return question
+
+
+def _retrieve_documents(question: str):
+    """Manually retrieve documents and truncate context."""
+    retriever = build_retriever()
+    docs = retriever.invoke(question)
+    logger.info("Manual Retrieval: Found %d documents.", len(docs))
+
+    total_context_len = sum(len(d.page_content) for d in docs)
+    logger.info("Total Context Characters: %d", total_context_len)
+
+    if total_context_len > MAX_CONTEXT_CHARS:
+        logger.warning("Context is too large! Truncating to %d chars.", MAX_CONTEXT_CHARS)
+        current_len = 0
+        truncated_docs = []
+        for d in docs:
+            if current_len + len(d.page_content) > MAX_CONTEXT_CHARS:
+                remaining = MAX_CONTEXT_CHARS - current_len
+                d.page_content = d.page_content[:remaining]
+                truncated_docs.append(d)
+                break
+            truncated_docs.append(d)
+            current_len += len(d.page_content)
+        docs = truncated_docs
+
+    return docs
+
+
+def _build_prompt(docs, question: str) -> str:
+    """Build the final prompt from retrieved documents and question."""
+    context_text = "\n\n".join([d.page_content for d in docs])
+    final_prompt = QA_PROMPT.format(context=context_text, input=question)
+
+    logger.info("Final Prompt Length: %d characters", len(final_prompt))
+    if len(final_prompt) > MAX_PROMPT_LENGTH:
+        logger.warning("Final prompt is unexpectedly huge! Truncating...")
+        final_prompt = final_prompt[:MAX_PROMPT_LENGTH]
+
+    return final_prompt
+
+
+def _format_sources(docs):
+    formatted_sources = []
+    for doc in docs:
+        source_name = doc.metadata.get("source", "Unknown")
+        filename = os.path.basename(source_name)
+        formatted_sources.append(f"- {filename}")
+    return formatted_sources
+
+
+def _llm_headers():
+    return {
+        "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:8000",
+        "X-Title": "NotchNet Local",
+    }
+
+
+def _call_llm(payload: dict, stream: bool = False):
+    url = f"{config.OPENROUTER_BASE_URL}/chat/completions"
+    resp = requests.post(url, headers=_llm_headers(), json=payload, stream=stream, timeout=60)
+    if resp.status_code != 200:
+        error_msg = f"Provider Error ({resp.status_code}): {resp.text}"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
+    return resp
 
 
 def generate_answer(question: str) -> str:
     global qa_chain
     if qa_chain is None:
-        print("🔧 Building QA chain for the first time...")
+        logger.info("Building QA chain for the first time...")
         qa_chain = build_qa_chain()
 
     try:
-        if len(question) > 2000:
-            print(f"⚠️ Truncating massive input ({len(question)} chars) to 2000 chars.")
-            question = question[:2000]
+        question = _truncate_question(question)
+        docs = _retrieve_documents(question)
+        final_prompt = _build_prompt(docs, question)
 
-        # 1. Manually retrieve documents
-        # We need access to the vector store or retriever directly.
-        # Since 'qa_chain' hides it, let's access the retriever from it if possible, 
-        # OR better: just rebuild/access the retriever here directly or cache it.
-        # Actually, let's just make 'retriever' global or accessible.
-        
-        # But for now, we can extract it from the chain if constructed that way, 
-        # OR just instantiate a temporary retriever/db search since we loaded the index.
-        # Let's rely on build_retriever() returning a new one (cheap enough) or cache it.
-        
-        retriever = build_retriever()
-        docs = retriever.invoke(question)
-        
-        print(f"🔎 Manual Retrieval: Found {len(docs)} documents.")
-        
-        # 2. Check and Truncate Context
-        total_context_len = sum(len(d.page_content) for d in docs)
-        print(f"📊 Total Context Characters: {total_context_len}")
-        
-        # Hard limit: 12,000 chars (approx 3k tokens) to be super safe
-        MAX_CTX_CHARS = 12000
-        if total_context_len > MAX_CTX_CHARS:
-             print(f"⚠️ Context is too large! Truncating to {MAX_CTX_CHARS} chars.")
-             current_len = 0
-             truncated_docs = []
-             for d in docs:
-                 if current_len + len(d.page_content) > MAX_CTX_CHARS:
-                     # Add remaining budget from this doc
-                     remaining = MAX_CTX_CHARS - current_len
-                     d.page_content = d.page_content[:remaining]
-                     truncated_docs.append(d)
-                     break
-                 truncated_docs.append(d)
-                 current_len += len(d.page_content)
-             docs = truncated_docs
+        logger.info("Sending request to LLM (%s) via Direct API...", config.LLM_MODEL)
 
-        # 3. Generate Answer Manually (Bypassing Chains)
-        # Manually join context
-        context_text = "\n\n".join([d.page_content for d in docs])
-        
-        # Prepare final prompt
-        final_prompt = QA_PROMPT.format(context=context_text, input=question)
-        
-        print(f"📝 Final Prompt Length: {len(final_prompt)} characters")
-        if len(final_prompt) > 20000:
-             print("⚠️ Final prompt is unexpectedly huge! Truncating...")
-             final_prompt = final_prompt[:20000]
-        
-        print(f"🚀 Sending request to LLM ({config.LLM_MODEL}) via Direct API...")
-        
-        headers = {
-            "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "http://localhost:8000",
-            "X-Title": "NotchNet Local",
-        }
-        
         payload = {
             "model": config.LLM_MODEL,
-            "messages": [
-                {"role": "user", "content": final_prompt}
-            ],
-            # Optional parameters to ensure safety
+            "messages": [{"role": "user", "content": final_prompt}],
             "temperature": 0.7,
-            "max_tokens": 2000, 
+            "max_tokens": 2000,
         }
-        
-        url = f"{config.OPENROUTER_BASE_URL}/chat/completions"
+
         try:
-            resp = requests.post(url, headers=headers, json=payload, timeout=60)
-            
-            if resp.status_code != 200:
-                error_msg = f"❌ Provider Error ({resp.status_code}): {resp.text}"
-                print(error_msg)
-                return f"Sorry, I encountered an error from the AI provider: {error_msg}\n"
-            
+            resp = _call_llm(payload)
             data = resp.json()
-            answer = data['choices'][0]['message']['content'].strip()
-            
-        except Exception as api_err:
-            print(f"❌ API Request Failed: {api_err}")
+            answer = data["choices"][0]["message"]["content"].strip()
+        except (requests.RequestException, RuntimeError) as api_err:
+            logger.error("API Request Failed: %s", api_err)
             return f"Sorry, the connection to the AI provider failed: {api_err}\n"
-        
-        if not answer:
-             return "❌ Sorry, I couldn't find a good answer to your question."
 
-        
         if not answer:
-             return "❌ Sorry, I couldn't find a good answer to your question."
-             
-        formatted_sources = []
-        for doc in docs:
-            source_name = doc.metadata.get("source", "Unknown")
-            filename = os.path.basename(source_name)
-            formatted_sources.append(f"- {filename}")
+            return "Sorry, I couldn't find a good answer to your question."
 
-        print(f"\n💬 Answer: {answer}\n")
+        formatted_sources = _format_sources(docs)
+        logger.info("Answer generated successfully.")
         if formatted_sources:
-            print("📚 Sources:")
-            for src in formatted_sources:
-                print(src)
+            logger.info("Sources:\n%s", "\n".join(formatted_sources))
 
         return f"{answer}\n"
 
     except Exception as e:
-        print(f"⚠️ Error while generating answer: {e}")
-        import traceback
-        traceback.print_exc()
-        raise e
+        logger.exception("Error while generating answer")
+        raise
 
 
 def generate_answer_stream(question: str):
@@ -248,77 +243,29 @@ def generate_answer_stream(question: str):
     """
     global qa_chain
     if qa_chain is None:
-        print("🔧 Building QA chain for the first time...")
+        logger.info("Building QA chain for the first time...")
         qa_chain = build_qa_chain()
 
     try:
-        if len(question) > 2000:
-            print(f"⚠️ Truncating massive input ({len(question)} chars) to 2000 chars.")
-            question = question[:2000]
+        question = _truncate_question(question)
+        docs = _retrieve_documents(question)
+        final_prompt = _build_prompt(docs, question)
 
-        # 1. Manual Retrieval
-        retriever = build_retriever()
-        docs = retriever.invoke(question)
-        
-        print(f"🔎 Manual Retrieval: Found {len(docs)} documents.")
-        
-        # 2. Context Truncation
-        total_context_len = sum(len(d.page_content) for d in docs)
-        MAX_CTX_CHARS = 12000
-        if total_context_len > MAX_CTX_CHARS:
-             print(f"⚠️ Context is too large! Truncating to {MAX_CTX_CHARS} chars.")
-             current_len = 0
-             truncated_docs = []
-             for d in docs:
-                 if current_len + len(d.page_content) > MAX_CTX_CHARS:
-                     remaining = MAX_CTX_CHARS - current_len
-                     d.page_content = d.page_content[:remaining]
-                     truncated_docs.append(d)
-                     break
-                 truncated_docs.append(d)
-                 current_len += len(d.page_content)
-             docs = truncated_docs
+        logger.info("Sending request to LLM (%s) via Direct API (STREAMING)...", config.LLM_MODEL)
 
-        # 3. Stream Generation
-        context_text = "\n\n".join([d.page_content for d in docs])
-        final_prompt = QA_PROMPT.format(context=context_text, input=question)
-        
-        if len(final_prompt) > 20000:
-             print("⚠️ Final prompt is unexpectedly huge! Truncating...")
-             final_prompt = final_prompt[:20000]
-        
-        print(f"🚀 Sending request to LLM ({config.LLM_MODEL}) via Direct API (STREAMING)...")
-        
-        headers = {
-            "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "http://localhost:8000",
-            "X-Title": "NotchNet Local",
-        }
-        
         payload = {
             "model": config.LLM_MODEL,
-            "messages": [
-                {"role": "user", "content": final_prompt}
-            ],
+            "messages": [{"role": "user", "content": final_prompt}],
             "temperature": 0.7,
-            "max_tokens": 2000, 
-            "stream": True # Enable streaming
+            "max_tokens": 2000,
+            "stream": True,
         }
-        
-        url = f"{config.OPENROUTER_BASE_URL}/chat/completions"
-        try:
-            with requests.post(url, headers=headers, json=payload, stream=True, timeout=60) as resp:
-                if resp.status_code != 200:
-                     error_msg = f"❌ Provider Error ({resp.status_code}): {resp.text}"
-                     print(error_msg)
-                     yield f"Error: {error_msg}"
-                     return
 
-                import json
+        try:
+            with _call_llm(payload, stream=True) as resp:
                 for line in resp.iter_lines():
                     if line:
-                        line_str = line.decode('utf-8')
+                        line_str = line.decode("utf-8")
                         if line_str.startswith("data: "):
                             data_str = line_str[6:]
                             if data_str == "[DONE]":
@@ -331,29 +278,16 @@ def generate_answer_stream(question: str):
                                     yield content
                             except json.JSONDecodeError:
                                 pass
-            
-        except Exception as api_err:
-            print(f"❌ API Request Failed: {api_err}")
-            yield f"Error: {str(api_err)}"
-        
-        # Determine if we should send sources
-        # For simplicity, let's append sources at the end if possible, 
-        # or maybe the client handles basic text appending.
-        # Ideally, we send structured events, but for now we are just yielding text chunks.
-        
-        formatted_sources = []
-        for doc in docs:
-            source_name = doc.metadata.get("source", "Unknown")
-            filename = os.path.basename(source_name)
-            formatted_sources.append(f"- {filename}")
+        except (requests.RequestException, RuntimeError) as api_err:
+            logger.error("API Request Failed: %s", api_err)
+            yield f"Error: {api_err}"
 
+        formatted_sources = _format_sources(docs)
         if formatted_sources:
             yield "\n\nSources:\n"
             for src in formatted_sources:
                 yield f"{src}\n"
 
     except Exception as e:
-        print(f"⚠️ Error while generating stream: {e}")
-        import traceback
-        traceback.print_exc()
-        yield f"Error: {str(e)}"
+        logger.exception("Error while generating stream")
+        yield f"Error: {e}"
