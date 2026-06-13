@@ -3,7 +3,7 @@
 NotchNet is an AI-powered Minecraft knowledge companion that uses RAG (Retrieval Augmented Generation) to answer questions about Minecraft and its mods. 
 Check it out: https://github.com/aaravchour/notchnet-mod
 
-## 🌟 Features
+## Features
 
 - **Local RAG Pipeline**: Runs entirely on your machine using Ollama.
 - **Dynamic Wiki Fetching**: Can fetch and index any MediaWiki-based wiki (e.g., RLCraft, Feed The Beast).
@@ -11,7 +11,7 @@ Check it out: https://github.com/aaravchour/notchnet-mod
 - **Cloud Mode**: Support for offloading AI inference to a remote server for low-end machines.
 - **Mod Awareness**: Context-aware answers based on the loaded wikis.
 
-## 🚀 Getting Started (Local)
+## Getting Started (Local)
 
 ### Prerequisites
 
@@ -51,7 +51,7 @@ Check it out: https://github.com/aaravchour/notchnet-mod
          -d '{"question": "How do I make a shield?"}'
     ```
 
-## 📚 Adding Mod Wikis (still in development)
+## Adding Mod Wikis (still in development)
 
 You can teach NotchNet about new mods by fetching their wikis.
 
@@ -69,7 +69,7 @@ curl -X POST http://localhost:8000/admin/add-wiki \
 
 _Note: This process runs in the background. It will fetch pages, clean them, rebuild the index, and reload the bot's memory._
 
-## 🛠 Configuration
+## Configuration
 
 See `config.py` for default settings. You can override them using environment variables or a `.env` file.
 
@@ -79,6 +79,12 @@ See `config.py` for default settings. You can override them using environment va
 | `LLM_MODEL` | Ollama model to use | `llama3` |
 | `OLLAMA_HOST` | URL of Ollama server | `http://127.0.0.1:11434` |
 
-## 📜 License
+## Note on my use of AI
+
+Due to a high volume of requests for newer Minecraft version support and my own limited personal time, future updates for NotchNet will be developed with the assistance of AI.
+
+Please note that the original codebase was entirely authored by me. AI is only being introduced now to keep the project alive for the community. Complaints regarding the use of AI will not be entertained.
+
+## License
 
 GPLv3 License. See [LICENSE](LICENSE) for details.
