@@ -72,13 +72,18 @@ def fetch_page_content(api_url, title):
     return "", []
 
 
+def make_windows_safe(s):
+    """Replaces characters that are invalid in Windows filenames with underscores."""
+    return re.sub(r'[<>:"/\\|?*]', "_", s)
+
+
 def save_page_data(category, title, text, image_path):
     """
     Saves the page data. If an image_path is provided, it's written
     at the top of the file for the cleaning script to use.
     """
-    safe_title = title.replace("/", "_")
-    folder = os.path.join(DATA_DIR, category)
+    safe_title = make_windows_safe(title)
+    folder = os.path.join(config.DATA_DIR_RAW, category)
     ensure_dir(folder)
     path = os.path.join(folder, f"{safe_title}.txt")
 
@@ -174,7 +179,7 @@ def process_page_work_item(api_url, work_item):
                     for _, page_info in info_pages.items():
                         image_url = page_info.get("imageinfo", [{}])[0].get("url")
                         if image_url:
-                            image_filename = image_title.replace("File:", "")
+                            image_filename = make_windows_safe(image_title.replace("File:", ""))
                             image_folder = "static/images/recipes"
                             image_path_to_save = download_image(image_url, image_folder, image_filename)
                             break  # Stop after finding the first recipe image
