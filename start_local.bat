@@ -26,16 +26,27 @@ python -m pip install -r requirements.txt
 
 :: 5. Configure Environment
 set FLASK_APP=server.py
-set LOCAL_MODE=true
-set CLOUD_MODE=true
-:: Default model (can be overridden by .env or user input if we wanted)
+
+:: Load .env if it exists to respect user config
+if exist .env (
+    for /f "usebackq tokens=1,2 delims==" %%A in (".env") do (
+        set "key=%%A"
+        if not "!key:~0,1!"=="#" (
+            set "%%A=%%B"
+        )
+    )
+)
+
+:: Set defaults only if not already set by .env
+if "%LOCAL_MODE%"=="" set LOCAL_MODE=true
+if "%CLOUD_MODE%"=="" set CLOUD_MODE=true
 if "%LLM_MODEL%"=="" set LLM_MODEL=moonshotai/kimi-k2:free
 
 echo.
 echo ---------------------------------------------------
 echo ✅ Configuration
 echo ---------------------------------------------------
-echo 🤖 LLM Model: %LLM_MODEL% (OpenRouter)
+echo 🤖 LLM Model: %LLM_MODEL%
 echo 🧠 Embeddings: Local (HuggingFace)
 echo ---------------------------------------------------
 

@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 # Load .env file
-load_dotenv()
+load_dotenv(override=True)
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,17 @@ CLOUD_API_KEY = os.environ.get("CLOUD_API_KEY", "")
 
 # OpenRouter / OpenAI Compatible Config
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+if not CLOUD_MODE:
+    # Default to local Ollama if cloud mode is off
+    base_url = OLLAMA_HOST
+    if not base_url.endswith("/v1"):
+        base_url = base_url.rstrip("/") + "/v1"
+    OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", base_url)
+    # If using local Ollama and no key is provided, use a dummy one to satisfy potential client requirements
+    if not OPENROUTER_API_KEY:
+        OPENROUTER_API_KEY = "ollama-local"
+else:
+    OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 
 # Default to a smaller model for local users if not specified, 
 # but if cloud mode is true, we might want a bigger default or user specified.

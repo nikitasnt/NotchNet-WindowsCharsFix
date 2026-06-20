@@ -30,22 +30,22 @@ $PYTHON_CMD -m pip install -r requirements.txt
 
 # 5. Configure Environment
 export FLASK_APP=server.py
-export LOCAL_MODE=true
-export CLOUD_MODE=true
-# Default model (can be overridden by .env or user input if we wanted)
-# But user requested OpenRouter only.
+
 # Load .env if it exists to respect user config
 if [ -f .env ]; then
     export $(grep -v '^#' .env | xargs)
 fi
 
+# Set defaults only if not already set by .env
+export LOCAL_MODE=${LOCAL_MODE:-"true"}
+export CLOUD_MODE=${CLOUD_MODE:-"true"}
 export LLM_MODEL=${LLM_MODEL:-"xiaomi/mimo-v2-flash:free"}
 
 echo ""
 echo "---------------------------------------------------"
 echo "✅ Configuration"
 echo "---------------------------------------------------"
-echo "🤖 LLM Model: $LLM_MODEL (OpenRouter)"
+echo "🤖 LLM Model: $LLM_MODEL"
 echo "🧠 Embeddings: Local (HuggingFace)"
 echo "---------------------------------------------------"
 
